@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Example</title>
+    <style>
+        body{
+            font-family:Arial, Helvetica, sans-serif;
+            height:100vh;
+            background-color: rgb(106, 165, 165);
+        }
+        h2{
+            margin-bottom: 20px;
+            text-align: center;
+
+        }
+
+        form{
+            margin-bottom: 20px;
+
+        }
+
+        label{
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="date"],
+        select{
+            width: 90%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        input[type="radio"],
+        input[type="checkbox"]{
+            margin-right: 5px;
+        }
+
+        select{
+            height: 40px;
+        }
+
+        input[type="submit"]{
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        table{
+            width: 150%;
+            border-collapse: collapse;
+        }
+
+        th,td{
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ccc;
+            white-space: nowrap;
+
+        }
+
+        th{
+            background-color: #f0f0f0;
+        }
+
+        #fromDataTable{
+            margin-top: 50px;
+        }
+        .radio-group label{
+            margin-right: 20px;
+        }
+        .edit-btn, .delete-btn{
+            cursor: pointer;
+        }
+        
+    </style>
+
+    <script src="..//asset/bootstrap-5.3.2-dist/js/jquery.min.js"></script>
+</head>
+<body>
+    <table>
+        <tr>
+            <td style="background-color: #0e4e60;width: 350px;">
+            <h2>Signup Form</h2>
+            <form id="signupForms" method="POST">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required autocomplete="off">
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required autocomplete="off">
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+
+                <label for="birthdate">Birthdate:</label>
+                <input type="date" id="birthdate" name="birthdate" required>
+
+
+                <div class="radio-group">
+                    <label>Gender:</label>
+                    <input type="radio" id="male" name="gender" value="Male" required>Male
+                    <input type="radio" id="female" name="gender" value="Female" required>Female
+                </div>
+                <label for="country">country:</label>
+                <select id="country" name="country" required>
+                    <option value="">Select country</option>
+                    <option value="UK">UK</option>
+                    <option value="USA">USA</option>
+                    <option value="Canada">Canada</option>
+                    <option value="India">India</option>
+                    <option value="Australia">Australia</option>
+                </select>
+
+                <br/>
+                <input type="checkbox" id="terms" name="terms" required>
+                I agree to the Terms and conditions
+                <br/>
+                <br/>
+                <input id="signupBtn" type="submit" value="Signup">
+            </form>
+            </td>
+            <td style="vertical-align: top;">
+            <div style="width:950px;overflow-x: scroll;max-height: 600px;overflow-y: scroll;">
+            <h2>Form Data Table</h2>
+            <table id="formDataTable">
+                <thead>
+                    <tr>
+                        <th style="display:none">ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Password</th>
+                        <th>Birthdate</th>
+                        <th>Gender</th>
+                        <th>Country</th>
+                        <th>T&C</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+            </table>
+            </div>
+            </td>
+        </tr>
+    </table>
+    <script>
+        $(document).ready(function(){
+            $('#signupForms').submit(function(event){
+                event.preventDefault();//Prevent form submission
+
+                //Reterive existing form data from local storage
+                var existingData=localStorage.getItem('formData');
+
+                //Initialize an empty array if no existing data is found
+                var fromDataArray=existingData ? JSON.parse(existingData):[];
+
+
+
+                //Generate a unique ID for the new record
+                var id='user_'+ new Date().getTime();
+
+
+                //create a new form data object for the current submission
+                var newFormData={
+                    id:id,
+                    name:$('#name').val(),
+                    email:$('#email').val(),
+                    password:$('#password').val(),
+                    birthdate:$('#birthdate').val(),
+                    gender:$('input[name=gender]:checked').val(),
+                    country:$('#country').val(),
+                    terms:$('#terms').prop('checked')
+                };
+                
+                //Add the new form data to the existing array
+                fromDataArray.push(newFormData);
+
+                //save the updated form data array in local storage
+                localStorage.setItem('formData',JSON.stringify(fromDataArray));
+
+                //optionally, you can display a success message or perform other actions
+                alert('Form data saved successfully');
+
+                //Reset the forms
+                $('#signupForms')[0].reset();
+
+                //Refresh the table
+                $('#formDataTable tbody').empty();
+                getData();
+
+            });
+            
+            //Referesh the table
+            $('#formDataTable tbody').empty();
+            getData();
+        });
+
+            function getData(){
+
+                //Retrive form data from local storage
+                var fromDataArray=JSON.parse(localStorage.getItem('formData'));
+
+                //check if form data exists
+                if(fromDataArray && fromDataArray.length >0){
+                    var tableBody=$('#formDataTable tbody');
+                    fromDataArray.forEach(function(formData){
+                        var row='<tr>'+
+                            '<td style="display:none">'+formData.id+'</td>'+
+                            '<td>'+ formData.name+'</td>'+
+                            '<td>'+ formData.email+'</td>'+
+                            '<td>'+ formData.password+'</td>'+
+                            '<td>'+ formData.birthdate+'</td>'+
+                            '<td>'+ formData.gender+'</td>'+
+                            '<td>'+ formData.country+'</td>'+
+                            '<td>'+ (formData.terms ?'Accepted':'Not Accepted')+'</td>'+
+                            '<td>'+
+                                '<span class="edit-btn" data-id="' + formData.id + '">Edit</span>|'+
+                                '<span class="delete-btn" data-id="' +formData.id +'">Delete</span>'+
+                                '</td>'+
+                                '</tr>';
+                                tableBody.append(row);
+                    });
+
+                    //Attach event listeners to the Edit and Delete buttons
+                    $('.edit-btn').click(editForm);
+                    $('.delete-btn').click(deleteForm);
+                }
+            }
+            function editForm() {
+                event.preventDefault();
+
+
+                var id=$(this).data('id');
+
+                //Retrive form data from the local storage
+                var fromDataArray=JSON.parse(localStorage.getItem('formData'));
+
+                //Find the form data with the given ID
+                var formData=fromDataArray.find(function (data) {
+                    return data.id===id;  
+                });
+                
+                //Fill the signup form with data
+                $('#name').val(formData.name);
+                $('#email').val(formData.email);
+                $('#password').val(formData.password);
+                $('#birthdate').val(formData.birthdate);
+                $('input[name="gender"][value="' +formData.gender+'"]').prop('checked',true);
+                $('#country').val(formData.country);
+                $('#terms').prop('checked', formData.terms);
+
+                //change the button text and event handler
+                $('#signupBtn').val('update').off('click').click(function(event){
+                   event.preventDefault();//Prevent form submission
+
+                   //update the form
+                   var index=fromDataArray.findIndex(function(data){
+                    return data.id===id;
+                   });
+
+                   if(index !=-1){
+
+                    fromDataArray[index].name=$('#name').val();
+                    fromDataArray[index].email=$('#email').val();
+                    formDataArray[index].password=$('#password').val();
+                    formDataArray[index].birthdate=$('#birthdate').val();
+                    formDataArray[index].gender=$('input[name=gender]:checked').val();
+                    formDataArray[index].country=$('#country').val();
+                    formDataArray[index].terms=$('#terms').is(':checked');
+
+                    
+                    
+                    
+                        
+                    
+                    //save the update form data array in local storage
+                    localStorage.setItem('formData', JSON.stringify(fromDataArray));
+
+                    //clear the form fileds
+                    $('#signupForms')[0].reset();
+                    
+                    //Refresh the table
+                    $('#formDataTable tbody').empty();
+                    getData();
+
+                    //change the button text back to signup
+                    $('#signupBtn').val('signup').off('click').click(function(e){
+                        e.preventDefault();
+                        $('#signupForms').submit();
+                    });
+                }
+                });    
+            }
+            function deleteForm(){
+                event.preventDefault();
+                
+                var id=$(this).data('id');
+
+                if(confirm('Are You sure uou want to delete form with ID:'+ id +'?')){
+
+                    // Reteriving form data from local storage
+                    var fromDataArray=JSON.parse(localStorage.getItem('formData'));
+
+                    //Filter out the form with the given ID
+                    var updateFormDataArray=fromDataArray.filter(function(formData){
+                        return formData.id !==id;
+                    });
+
+                    //save the updated form data array in local storage
+                    localStorage.setItem('formData',JSON.stringify(updateFormDataArray));
+
+
+                    //clear the table and reload the data
+                    $('#formDataTable tbody').empty();
+                    getData();
+                }
+            }
+        
+    </script>
+</body>
+</html>
